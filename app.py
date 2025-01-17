@@ -42,18 +42,31 @@ for title in posts:
         countries.append((match.group("origin").strip(), match.group("destination").strip()))
         
         
-from rapidfuzz import process, fuzz
-
-def normalize_country(name, country_list):
-    match, score = process.extractOne(name, country_list, scorer=fuzz.ratio)
-    return match if score > 85 else None
-
-
 import pandas as pd
+from rapidfuzz import process
 
-df = pd.DataFrame(countries, columns=["Origin", "Destination"])
-origin_counts = df["Origin"].value_counts()
-destination_counts = df["Destination"].value_counts()
+# Define normalize_country function
+def normalize_country(country, country_list):
+    if not isinstance(country, str) or not country_list:
+        return None
+    match = process.extractOne(country, country_list)
+    return match[0] if match else None
+
+# Fetch GDP data (example structure)
+gdp_data = pd.DataFrame({
+    "Country Name": ["Malaysia", "India", "United States"],
+    "GDP per Capita": [11314.8, 1917.7, 63543.6]
+})
+
+# Rename the column to a consistent name
+gdp_data.rename(columns={"Country Name": "Country"}, inplace=True)
+
+# Ensure "Country" column exists
+if "Country" in gdp_data.columns:
+    gdp_data["Country"] = gdp_data["Country"].apply(lambda x: normalize_country(x, df["Origin"].unique()))
+else:
+    print("Error: 'Country' column not found in gdp_data.")
+
 
 
 import wbgapi as wb
