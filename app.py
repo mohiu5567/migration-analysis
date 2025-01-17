@@ -1,14 +1,34 @@
 
 
+import time
 import praw
+from prawcore.exceptions import ResponseException, RequestException
 
-reddit = praw.Reddit(
-    client_id="your_client_id",
-    client_secret="your_client_secret",
-    user_agent="your_user_agent"
-)
-subreddit = reddit.subreddit("IWantOut")
-posts = [post.title for post in subreddit.new(limit=1000)]
+try:
+    reddit = praw.Reddit(
+        client_id="COm5Ms_7OsuACtim62OEnA",
+        client_secret="q5_pjZ0dhTq_o_mXoIRMaL_TAEsX0w",
+        user_agent="migration analysis",
+    )
+
+    subreddit = reddit.subreddit("IWantOut")
+    posts = []
+    
+    # Use a loop to avoid exceeding the rate limit
+    for post in subreddit.new(limit=1000):
+        posts.append(post.title)
+        time.sleep(1)  # Add a small delay between requests to avoid rate limits
+
+except ResponseException as e:
+    print("Authentication failed. Check your credentials.")
+    print(e)
+except RequestException as e:
+    print("Request failed. Check your internet connection or Reddit API status.")
+    print(e)
+except Exception as e:
+    print("An unexpected error occurred.")
+    print(e)
+
 
 
 
